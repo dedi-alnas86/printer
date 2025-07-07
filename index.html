@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Printer Management Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=Crimson+Text:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        .dashboard-container::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50" font-size="50" opacity="0.03">🖨️</text></svg>') repeat;
+            background-size: 100px 100px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 2px;
+        }
+
+        .header::after {
+            content: '🖨️ 💼 📊 ⚙️ 🔧';
+            position: absolute;
+            top: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            opacity: 0.3;
+            animation: floatIcons 3s ease-in-out infinite;
+            letter-spacing: 15px;
+        }
+
+        @keyframes floatIcons {
+            0%, 100% { transform: translateX(-50%) translateY(0px); }
+            50% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 6px 12px rgba(0,0,0,0.4);
+            animation: glow 2s ease-in-out infinite alternate;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #ffffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @keyframes glow {
+            from { 
+                text-shadow: 0 6px 12px rgba(0,0,0,0.4);
+                transform: scale(1);
+            }
+            to { 
+                text-shadow: 0 8px 25px rgba(255,255,255,0.3);
+                transform: scale(1.02);
+            }
+        }
+
+        .header p {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 400;
+            opacity: 0.95;
+            margin-top: 15px;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            opacity: 0.6;
+        }
+
+        .stat-card:nth-child(1)::after {
+            content: '💚';
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+        }
+
+        .stat-card:nth-child(2)::after {
+            content: '❤️';
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+
+        .stat-card:nth-child(3)::after {
+            content: '🔧';
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+        }
+
+        .stat-card:nth-child(4)::after {
+            content: '📈';
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .stat-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            letter-spacing: -0.02em;
+        }
+
+        .stat-label {
+            font-family: 'Inter', sans-serif;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .printers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .printer-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .printer-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24);
+            background-size: 300% 300%;
+            animation: gradient 3s ease infinite;
+        }
+
+        .printer-card::after {
+            content: '🖨️';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 2rem;
+            opacity: 0.1;
+            transition: all 0.3s ease;
+        }
+
+        .printer-card:hover::after {
+            opacity: 0.3;
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .printer-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .printer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .printer-name {
+            font-family: 'Crimson Text', serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2c3e50;
+            letter-spacing: 0.3px;
+        }
+
+        .status-badge {
+            font-family: 'Inter', sans-serif;
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .status-online {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            color: white;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-offline {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .status-maintenance {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .printer-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .detail-item::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            opacity: 0.3;
+        }
+
+        .detail-item:nth-child(1)::before {
+            content: '🌐';
+        }
+
+        .detail-item:nth-child(2)::before {
+            content: '📍';
+        }
+
+        .detail-item:nth-child(3)::before {
+            content: '🏷️';
+        }
+
+        .detail-item:nth-child(4)::before {
+            content: '🎨';
+        }
+
+        .detail-item:nth-child(5)::before {
+            content: '📄';
+        }
+
+        .detail-item:nth-child(6)::before {
+            content: '⏰';
+        }
+
+        .detail-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .detail-item:hover::before {
+            opacity: 0.6;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .printer-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .search-filter {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-filter::before {
+            content: '🔍 📊 ⚙️';
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 1.5rem;
+            opacity: 0.1;
+            letter-spacing: 10px;
+        }
+
+        .search-filter::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #4ecdc4);
+            background-size: 200% 100%;
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -100% 0; }
+            100% { background-position: 100% 0; }
+        }
+
+        .search-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 20px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .refresh-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .header p {
+                font-size: 1.1rem;
+            }
+            
+            .search-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .printers-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .printer-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-number {
+                font-size: 2.3rem;
+            }
+        }
+
+        /* Footer Styles */
+        .footer {
+            background: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 60px;
+            padding: 40px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24, #ff6b6b);
+            background-size: 200% 100%;
+            animation: gradientFlow 4s ease-in-out infinite;
+        }
+
+        .footer::after {
+            content: '🖨️ 💼 📊 ⚙️ 🔧 🌐 📱 💡';
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            opacity: 0.1;
+            letter-spacing: 10px;
+            animation: floatFooterIcons 4s ease-in-out infinite;
+        }
+
+        @keyframes floatFooterIcons {
+            0%, 100% { transform: translateY(0px); opacity: 0.1; }
+            50% { transform: translateY(-10px); opacity: 0.2; }
+        }
+
+        @keyframes gradientFlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            color: white;
+        }
+
+        .footer-section h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 0.5px;
+        }
+
+        .footer-section p {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 400;
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 15px;
+            letter-spacing: 0.3px;
+        }
+
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 12px;
+        }
+
+        .footer-section ul li a {
+            font-family: 'Inter', sans-serif;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            letter-spacing: 0.2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-section ul li a:hover {
+            color: #ffffff;
+            transform: translateX(5px);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .footer-brand .logo {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer-brand .brand-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            backdrop-filter: blur(5px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .social-links a:hover::before {
+            transform: translateX(100%);
+        }
+
+        .social-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-bottom p {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin: 0;
+            letter-spacing: 0.3px;
+        }
+
+        .footer-bottom .copyright {
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .footer-bottom .credits {
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        @media (max-width: 1024px) {
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 25px;
+                text-align: center;
+            }
+            
+            .footer-brand {
+                justify-content: center;
+            }
+            
+            .social-links {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>🖨️ Printer Management Dashboard</h1>
+            <p>Monitor dan kelola semua printer dalam jaringan Anda</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🟢</div>
+                <div class="stat-number" id="online-count">8</div>
+                <div class="stat-label">Online</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🔴</div>
+                <div class="stat-number" id="offline-count">2</div>
+                <div class="stat-label">Offline</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🟡</div>
+                <div class="stat-number" id="maintenance-count">1</div>
+                <div class="stat-label">Maintenance</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-number" id="total-count">11</div>
+                <div class="stat-label">Total Printer</div>
+            </div>
+        </div>
+
+        <div class="search-filter">
+            <div class="search-grid">
+                <div class="form-group">
+                    <label class="form-label">🔍 Cari Printer</label>
+                    <input type="text" class="form-input" placeholder="Masukkan nama printer atau IP address..." id="search-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">📍 Filter Lokasi</label>
+                    <select class="form-input" id="location-filter">
+                        <option value="">Semua Lokasi</option>
+                        <option value="lantai-1">Lantai 1</option>
+                        <option value="lantai-2">Lantai 2</option>
+                        <option value="lantai-3">Lantai 3</option>
+                        <option value="server-room">Server Room</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">🔄 Status</label>
+                    <select class="form-input" id="status-filter">
+                        <option value="">Semua Status</option>
+                        <option value="online">Online</option>
+                        <option value="offline">Offline</option>
+                        <option value="maintenance">Maintenance</option>
+                    </select>
+                </div>
+            </div>
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="refresh-btn" onclick="refreshData()">🔄 Refresh Data</button>
+            </div>
+        </div>
+
+        <div class="printers-grid" id="printers-container">
+            <!-- Printer cards will be generated here -->
+        </div>
+        
+        <!-- Footer Section -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-brand">
+                        <div class="logo">🖨️</div>
+                        <div class="brand-text">PrinterHub</div>
+                    </div>
+                    <p>Solusi manajemen printer terdepan untuk kebutuhan bisnis modern. Mengelola, memonitor, dan mengoptimalkan semua printer dalam jaringan Anda dengan teknologi terkini.</p>
+                    <div class="social-links">
+                        <a href="#" title="Facebook">📘</a>
+                        <a href="#" title="Twitter">🐦</a>
+                        <a href="#" title="LinkedIn">💼</a>
+                        <a href="#" title="Instagram">📸</a>
+                        <a href="#" title="YouTube">📺</a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Fitur Utama</h3>
+                    <ul>
+                        <li><a href="#">🔍 Monitoring Real-time</a></li>
+                        <li><a href="#">📊 Analytics Dashboard</a></li>
+                        <li><a href="#">🔧 Remote Management</a></li>
+                        <li><a href="#">📱 Mobile Support</a></li>
+                        <li><a href="#">🚨 Alert System</a></li>
+                        <li><a href="#">📈 Usage Reports</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Bantuan</h3>
+                    <ul>
+                        <li><a href="#">📚 Dokumentasi</a></li>
+                        <li><a href="#">🎓 Tutorial</a></li>
+                        <li><a href="#">💬 Live Chat</a></li>
+                        <li><a href="#">📧 Email Support</a></li>
+                        <li><a href="#">🔧 Technical Support</a></li>
+                        <li><a href="#">❓ FAQ</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Perusahaan</h3>
+                    <ul>
+                        <li><a href="#">🏢 Tentang Kami</a></li>
+                        <li><a href="#">👥 Tim</a></li>
+                        <li><a href="#">📰 Berita</a></li>
+                        <li><a href="#">💼 Karir</a></li>
+                        <li><a href="#">🤝 Partnership</a></li>
+                        <li><a href="#">📞 Kontak</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p class="copyright">© 2025 PrinterHub Dashboard. Semua hak cipta dilindungi.</p>
+                <p class="credits">Dibuat dengan ❤️ untuk manajemen printer yang lebih efisien</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Sample printer data
+        const printersData = [
+            {
+                name: "HP LaserJet Pro 400",
+                ip: "192.168.1.101",
+                location: "Lantai 1 - Ruang Admin",
+                status: "online",
+                model: "HP LaserJet Pro 400",
+                toner: "85%",
+                jobs: 3,
+                uptime: "5 hari 12 jam"
+            },
+            {
+                name: "Canon PIXMA G3000",
+                ip: "192.168.1.102",
+                location: "Lantai 1 - Ruang HR",
+                status: "online",
+                model: "Canon PIXMA G3000",
+                toner: "45%",
+                jobs: 1,
+                uptime: "2 hari 8 jam"
+            },
+            {
+                name: "Epson L3150",
+                ip: "192.168.1.103",
+                location: "Lantai 2 - Ruang Finance",
+                status: "offline",
+                model: "Epson L3150",
+                toner: "12%",
+                jobs: 0,
+                uptime: "Offline"
+            },
+            {
+                name: "Brother HL-L2350DW",
+                ip: "192.168.1.104",
+                location: "Lantai 2 - Ruang IT",
+                status: "online",
+                model: "Brother HL-L2350DW",
+                toner: "92%",
+                jobs: 7,
+                uptime: "12 hari 3 jam"
+            },
+            {
+                name: "HP DeskJet 2130",
+                ip: "192.168.1.105",
+                location: "Lantai 3 - Ruang Marketing",
+                status: "maintenance",
+                model: "HP DeskJet 2130",
+                toner: "78%",
+                jobs: 0,
+                uptime: "Maintenance"
+            },
+            {
+                name: "Samsung ML-1640",
+                ip: "192.168.1.106",
+                location: "Server Room",
+                status: "online",
+                model: "Samsung ML-1640",
+                toner: "56%",
+                jobs: 2,
+                uptime: "8 hari 15 jam"
+            }
+        ];
+
+        function getStatusClass(status) {
+            const statusClasses = {
+                'online': 'status-online',
+                'offline': 'status-offline',
+                'maintenance': 'status-maintenance'
+            };
+            return statusClasses[status] || 'status-offline';
+        }
+
+        function getStatusIcon(status) {
+            const statusIcons = {
+                'online': '🟢',
+                'offline': '🔴',
+                'maintenance': '🟡'
+            };
+            return statusIcons[status] || '🔴';
+        }
+
+        function getStatusText(status) {
+            const statusTexts = {
+                'online': 'Online',
+                'offline': 'Offline',
+                'maintenance': 'Maintenance'
+            };
+            return statusTexts[status] || 'Offline';
+        }
+
+        function generatePrinterCard(printer) {
+            return `
+                <div class="printer-card">
+                    <div class="printer-header">
+                        <div class="printer-name">${printer.name}</div>
+                        <div class="status-badge ${getStatusClass(printer.status)}">
+                            ${getStatusIcon(printer.status)} ${getStatusText(printer.status)}
+                        </div>
+                    </div>
+                    <div class="printer-details">
+                        <div class="detail-item">
+                            <div class="detail-label">IP Address</div>
+                            <div class="detail-value">${printer.ip}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Lokasi</div>
+                            <div class="detail-value">${printer.location}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Model</div>
+                            <div class="detail-value">${printer.model}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Tinta/Toner</div>
+                            <div class="detail-value">${printer.toner}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Jobs Queue</div>
+                            <div class="detail-value">${printer.jobs} jobs</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Uptime</div>
+                            <div class="detail-value">${printer.uptime}</div>
+                        </div>
+                    </div>
+                    <div class="printer-actions">
+                        <button class="action-btn btn-primary" onclick="showDetails('${printer.name}')">
+                            📋 Detail
+                        </button>
+                        <button class="action-btn btn-secondary" onclick="testPrint('${printer.name}')">
+                            🖨️ Test Print
+                        </button>
+                        <button class="action-btn btn-success" onclick="configure('${printer.name}')">
+                            ⚙️ Config
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPrinters(printers = printersData) {
+            const container = document.getElementById('printers-container');
+            container.innerHTML = printers.map(printer => generatePrinterCard(printer)).join('');
+        }
+
+        function updateStats() {
+            const online = printersData.filter(p => p.status === 'online').length;
+            const offline = printersData.filter(p => p.status === 'offline').length;
+            const maintenance = printersData.filter(p => p.status === 'maintenance').length;
+            const total = printersData.length;
+
+            document.getElementById('online-count').textContent = online;
+            document.getElementById('offline-count').textContent = offline;
+            document.getElementById('maintenance-count').textContent = maintenance;
+            document.getElementById('total-count').textContent = total;
+        }
+
+        function filterPrinters() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const locationFilter = document.getElementById('location-filter').value;
+            const statusFilter = document.getElementById('status-filter').value;
+
+            const filtered = printersData.filter(printer => {
+                const matchesSearch = printer.name.toLowerCase().includes(searchTerm) || 
+                                    printer.ip.includes(searchTerm) ||
+                                    printer.location.toLowerCase().includes(searchTerm);
+                
+                const matchesLocation = !locationFilter || printer.location.toLowerCase().includes(locationFilter);
+                const matchesStatus = !statusFilter || printer.status === statusFilter;
+
+                return matchesSearch && matchesLocation && matchesStatus;
+            });
+
+            renderPrinters(filtered);
+        }
+
+        function showDetails(printerName) {
+            alert(`Menampilkan detail untuk printer: ${printerName}`);
+        }
+
+        function testPrint(printerName) {
+            alert(`Mengirim test print ke: ${printerName}`);
+        }
+
+        function configure(printerName) {
+            alert(`Membuka konfigurasi untuk: ${printerName}`);
+        }
+
+        function refreshData() {
+            // Simulate data refresh
+            const refreshBtn = document.querySelector('.refresh-btn');
+            refreshBtn.innerHTML = '🔄 Refreshing...';
+            refreshBtn.disabled = true;
+            
+            setTimeout(() => {
+                refreshBtn.innerHTML = '🔄 Refresh Data';
+                refreshBtn.disabled = false;
+                alert('Data berhasil diperbarui!');
+            }, 1000);
+        }
+
+        // Event listeners
+        document.getElementById('search-input').addEventListener('input', filterPrinters);
+        document.getElementById('location-filter').addEventListener('change', filterPrinters);
+        document.getElementById('status-filter').addEventListener('change', filterPrinters);
+
+        // Initialize dashboard
+        renderPrinters();
+        updateStats();
+
+        // Auto refresh every 30 seconds
+        setInterval(() => {
+            // In real implementation, this would fetch fresh data from server
+            updateStats();
+        }, 30000);
+    </script>
+</body>
+</html>
