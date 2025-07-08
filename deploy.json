@@ -1,0 +1,62 @@
+[
+            {
+                name: "HP LaserJet Pro 400",
+                ip: "192.168.1.101",
+                location: "Lantai 1 - Ruang Admin",
+                status: "online",
+                model: "HP LaserJet Pro 400",
+                toner: "85%",
+                jobs: 3,
+                uptime: "5 hari 12 jam"
+            },
+            {
+                name: "Canon PIXMA G3000",
+                ip: "192.168.1.102",
+                location: "Lantai 1 - Ruang HR",
+                status: "online",
+                model: "Canon PIXMA G3000",
+                toner: "45%",
+                jobs: 1,
+                uptime: "2 hari 8 jam"
+            },
+            {
+                name: "Epson L3150",
+                ip: "192.168.1.103",
+                location: "Lantai 2 - Ruang Finance",
+                status: "offline",
+                model: "Epson L3150",
+                toner: "12%",
+                jobs: 0,
+                uptime: "Offline"
+            },
+            {
+                name: "Brother HL-L2350DW",
+                ip: "192.168.1.104",
+                location: "Lantai 2 - Ruang IT",
+                status: "online",
+                model: "Brother HL-L2350DW",
+                toner: "92%",
+                jobs: 7,
+                uptime: "12 hari 3 jam"
+            },
+            {
+                name: "HP DeskJet 2130",
+                ip: "192.168.1.105",
+                location: "Lantai 3 - Ruang Marketing",
+                status: "maintenance",
+                model: "HP DeskJet 2130",
+                toner: "78%",
+                jobs: 0,
+                uptime: "Maintenance"
+            },
+            {
+                name: "Samsung ML-1640",
+                ip: "192.168.1.106",
+                location: "Server Room",
+                status: "online",
+                model: "Samsung ML-1640",
+                toner: "56%",
+                jobs: 2,
+                uptime: "8 hari 15 jam"
+            }
+        ];
